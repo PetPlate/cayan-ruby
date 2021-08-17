@@ -4,13 +4,15 @@ module Cayan
   module Merchantware
     module Credit
       class Client
-        @client = nil
-        attr_accessor :credentials
+        WSDL = 'https://ps1.merchantware.net/Merchantware/ws/RetailTransaction/v45/Credit.asmx?WSDL'
 
-        def initialize(credentials)
+        attr_accessor :credentials, :wsdl
+
+        def initialize(credentials, wsdl: WSDL)
           @credentials = credentials
+          @wsdl = wsdl
           @client = Savon.client(
-            wsdl: 'https://ps1.merchantware.net/Merchantware/ws/RetailTransaction/v45/Credit.asmx?WSDL',
+            wsdl: self.wsdl,
             convert_request_keys_to: :camelcase
           )
         end
