@@ -18,33 +18,25 @@ module Cayan
         end
 
         def current_batch_summary(filters)
-          response = @client.call(:current_batch_summary, message: credentials.merge(filters))
-
-          response.body[:current_batch_summary_response][:current_batch_summary_result]
+          request(:current_batch_summary, filters)
         end
 
         def current_batch_transactions
-          response = @client.call(:current_batch_transactions, message: credentials)
-          
-          response.body[:current_batch_transactions_response][:current_batch_transactions_result]
+          request(:current_batch_transactions)
         end
 
         def summary_by_date(filters)
-          response = @client.call(:summary_by_date, message: credentials.merge(filters))
-
-          response.body[:summary_by_date_response][:summary_by_date_result]
+          request(:summary_by_date, filters)
         end
-        
-        def transactions_by_date(filters)
-          response = @client.call(:transactions_by_date, message: credentials.merge(filters))
 
-          response.body[:transactions_by_date_response][:transactions_by_date_result]
+        def transactions_by_date(filters)
+          request(:transactions_by_date, filters)
         end
 
         def transactions_by_reference(filters)
           response = @client.call(:transactions_by_date, message: credentials.merge(filters))
 
-          response.body[:transactions_by_reference_response][:transactions_by_reference_result]
+          response.body.dig(:transactions_by_reference_response, :transactions_by_reference_result)
         end
 
         def transactions_by_transaction_id(transaction_id)
@@ -52,21 +44,26 @@ module Cayan
             merchant_transaction_id: transaction_id
           }))
           
-          response.body[:transactions_by_transaction_id_response][:transactions_by_transaction_id_result]
+          response.body.dig(:transactions_by_transaction_id_response, :transactions_by_transaction_id_result)
         end
 
         def detailed_transaction_by_reference(filters)
-          response = @client.call(:detailed_transaction_by_reference, message: credentials.merge(filters))
-
-          response.body[:detailed_transaction_by_reference_response][:detailed_transaction_by_reference_result]
+          request(:detailed_transaction_by_reference, filters)
         end
 
         def detailed_transaction_by_transaction_id(transaction_id)
-          response = @client.call(:detailed_transaction_by_transaction_id, message: credentials.merge({
+          request(:detailed_transaction_by_transaction_id, {
             merchant_transaction_id: transaction_id
-          }))
+          })
+        end
 
-          response.body[:detailed_transaction_by_transaction_id_response][:detailed_transaction_by_transaction_id_result]
+        private
+
+        def request(name, payload = {})
+          @client
+            .call(name.to_sym, message: credentials.merge(payload))
+            .body
+            .dig(:"#{name}_response", :"#{name}_result")
         end
       end
     end
